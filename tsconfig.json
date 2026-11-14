@@ -28,6 +28,9 @@
     ],
     "paths": {
       "@gatway/*": ["src/*"]
-    }
-  }
+    },
+  
+  },
+  "include":["src"],
+  "exclude": ["node_modules"]
 }
