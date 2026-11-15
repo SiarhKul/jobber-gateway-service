@@ -16,6 +16,7 @@ import http from 'http';
 import { Logger } from 'winston';
 import { config } from './config';
 import { elasticSearch } from './elasticsearch';
+import { appRouts } from './routes';
 
 const SERVER_PORT = 4000;
 const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gatewayServer', 'debug');
@@ -86,9 +87,7 @@ export class GatewayServer {
   }
 
   private routesMiddleware(app: Application): void {
-    app.get('/health', (_req: Request, res: Response) => {
-      res.status(200).json({ status: 'ok' });
-    });
+    appRouts(app)
   }
 
   private startElasticSearch(): void {
