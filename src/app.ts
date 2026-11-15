@@ -4,7 +4,9 @@ import { GatewayServer } from '@gateway/server';
 class Application {
 	public initialize(): void {
 		const app: Express = express();
+		
 		const server: GatewayServer = new GatewayServer(app);
+
 		server.start();
 	}
 }

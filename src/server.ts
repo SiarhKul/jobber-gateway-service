@@ -1,5 +1,12 @@
-import {  winstonLogger } from '@SiarhKul/jobber-shared';
-import { Application, json, NextFunction, Request, Response, urlencoded } from 'express';
+import { winstonLogger } from '@SiarhKul/jobber-shared';
+import {
+  type Application,
+  json,
+  type NextFunction,
+  type Request,
+  type Response,
+  urlencoded
+} from 'express';
 import cookieSession from 'cookie-session';
 import hpp from 'hpp';
 import helmet from 'helmet';
@@ -7,10 +14,11 @@ import cors from 'cors';
 import compression from 'compression';
 import http from 'http';
 import { Logger } from 'winston';
+import { config } from './config';
+import { elasticSearch } from './elasticsearch';
 
 const SERVER_PORT = 4000;
-const log: Logger = winstonLogger('http://localhost:9200','gatewayServer', 'debug');
-
+const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gatewayServer', 'debug');
 
 export class GatewayServer {
   private app: Application;
@@ -53,9 +61,9 @@ export class GatewayServer {
     app.use(
       cookieSession({
         name: 'session',
-        keys: [],
+        keys: [`${config.SECRET_KEY_ONE}`, `${config.SECRET_KEY_TWO}`],
         maxAge: 24 * 7 * 3600000,
-        secure: false // update with value from config
+        secure: config.NODE_ENV !== 'development' // update with value from config
         // sameSite: 'none'
       })
     );
@@ -63,7 +71,7 @@ export class GatewayServer {
     app.use(helmet());
     app.use(
       cors({
-        origin: '',
+        origin: `${config.CLIENT_URL}`,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
       })
@@ -84,6 +92,7 @@ export class GatewayServer {
   }
 
   private startElasticSearch(): void {
+    elasticSearch.checkConnection()
     log.info('Gateway server initialized Elasticsearch integration');
   }
 
