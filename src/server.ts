@@ -17,6 +17,7 @@ import { Logger } from 'winston';
 import { config } from './config';
 import { elasticSearch } from './elasticsearch';
 import { appRouts } from './routes';
+import { axiosAuthInstance } from './services/api/auth.service';
 
 const SERVER_PORT = 4000;
 const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gatewayServer', 'debug');
@@ -40,7 +41,7 @@ export class GatewayServer {
   private async startServer(app: Application): Promise<void> {
     try {
       const httpServer: http.Server = new http.Server(app);
-      
+
       await this.startHttpServer(httpServer);
     } catch (error) {
       log.log('error', 'GatewayService startServer() error method:', error);
@@ -78,6 +79,13 @@ export class GatewayServer {
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
       })
     );
+
+    app.use((req: Request, _res: Response, next: NextFunction) => {
+      if (req.session?.jwt) {
+        axiosAuthInstance.defaults.headers['Authorization'] = `Bearer ${req.session.jwt}`;
+      }
+      next();
+    });
   }
 
   private standardMiddleware(app: Application): void {
@@ -88,11 +96,11 @@ export class GatewayServer {
   }
 
   private routesMiddleware(app: Application): void {
-    appRouts(app)
+    appRouts(app);
   }
 
   private startElasticSearch(): void {
-    elasticSearch.checkConnection()
+    elasticSearch.checkConnection();
     log.info('Gateway server initialized Elasticsearch integration');
   }
 
