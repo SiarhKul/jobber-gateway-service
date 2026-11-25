@@ -1,8 +1,10 @@
-import { Application } from "express";
-import { healthRoutes } from "./routes/health";
+import { Application } from 'express';
+import { healthRoutes } from './routes/health';
+import { authRoutes } from './routes/auth/auth';
 
-export const appRouts = (app: Application)=>{
+const BASE_PATH = '/api/gateway/v1';
 
-app.use('', healthRoutes.routes())
-
-}
+export const appRouts = (app: Application) => {
+  app.use('', healthRoutes.routes());
+  app.use(BASE_PATH, authRoutes.routes());
+};
